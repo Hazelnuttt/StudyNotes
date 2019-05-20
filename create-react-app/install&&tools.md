@@ -102,7 +102,7 @@ ps:可以使用`npm`,但是`yarn`更快、更安全
 ### 工具链
 
 - `.editorconfig`
-- `perttier`
+- `prettier`
 - `husky + lint-staged + commitlint`
 
 ### Redux 初了解
