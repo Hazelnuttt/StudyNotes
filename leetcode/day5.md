@@ -14,39 +14,9 @@
 
 #### 先说说我的 code
 
-```js
-var removeDuplicates = function(nums) {
-  var len = nums.length
-  var count = 0
-  var flag = 0
-  var j = 0
-  for (i = 0; i < len - 1; i++) {
-    if (nums[i] == nums[i + 1]) {
-      count++
-    } else {
-      if (count >= 1) {
-        nums[j] = nums[j + 1] = nums[i]
-        j = j + 2
-        flag += count - 1
-      } else {
-        nums[j] = nums[i]
-        j = j + 1
-      }
-      count = 0
-    }
-    if ((i = len - 1 && nums[i] == nums[i + 1])) {
-      nums[j] = nums[j + 1] = nums[i]
-      flag += count - 1
-    } else {
-      nums[j] = nums[i + 1]
-    }
-  }
-  len = len - flag
-  return len
-}
-```
+类似于我 day4 写的
 
-就是类似于我 day4 写的
+> 已删
 
 #### 借鉴的代码
 
@@ -71,3 +41,7 @@ var s = ['a', 'b', 'c']
 console.log(s.splice(2, 1))
 console.log(s) //打印['a','b']
 ```
+
+### Review
+
+鉴于我提交失败的代码太长，已经删除，review 的时候我都没耐心看。。。

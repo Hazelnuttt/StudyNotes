@@ -9,3 +9,24 @@
 ### 讨论区
 
 然后我去看讨论区，都说双指针，丝毫 get 不到灵感。然后看了下证明，证明有点高大上，我说的土一点。就是假设它`x`轴定长，如果要面积大的话，肯定得是所有定长的情况下。最长+倒数第二长的组合。===》得出结论从两边往里边缩（定长`x`逐渐减小）的时候，要留着长的那根，so 双指针解这个东西我懂了。
+
+### 代码
+
+```Cpp
+class Solution {
+public:
+    int maxArea(vector<int>& height) {
+        int max = 0, i = 0, j = height.size() - 1;
+        while (i < j){
+            max = std::max(max,std::min(height[i],height[j]) * (j - i));
+            if (height[i] < height[j]){
+                i++;
+            }
+            else{
+                j--;
+            }
+        }
+        return max;
+    }
+};
+```
