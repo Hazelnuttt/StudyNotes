@@ -1,4 +1,185 @@
-# 项目总结与思考（一个基于`react`+`react-router`+`redux`的官网）
+# 项目总结（一个基于`react`+`react-router`+`redux`的官网）
+
 ## 第三方库
-+ antd
-+ 
+
+- antd
+- axios
+
+## axios
+
+- 有一些[固定的封装好的方法](https://github.com/axios/axios/blob/master/README.md#request-method-aliases) get/post/delete/put...
+- 使用自定义配置[创建一个 axios 实例](https://github.com/axios/axios/blob/master/README.md#creating-an-instance)
+- [拦截器（err/loading）](https://github.com/axios/axios/blob/master/README.md#interceptors)
+
+```js
+class Axios {
+  private axiosInstance: AxiosInstance;
+
+  constructor(props: any = {}) {
+    this.axiosInstance = axios.create({
+      baseURL: props.baseURL || BASE,
+      timeout: props.timeout || 5000,
+      headers: {
+        token: props.token || localStorage.getItem('user_token') || ''
+      }
+    });
+
+    // 拦截器
+    this.axiosInstance.interceptors.response.use(
+      response => {
+        return response;
+      },
+      error => {
+        message.error('网络请求异常！');
+        console.log(error);
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  // 更新 header 中的 token
+  public updateToken = (token: string) => {
+    this.axiosInstance.defaults.headers.common['token'] = token;
+  };
+
+  public get = (url: string, config?: AxiosRequestConfig): Promise<any> => {
+   ...
+  };
+
+  public post =...
+
+  public put =...
+
+  public delete =...
+
+const axiosInstance = new Axios();
+
+export default axiosInstance;
+export const get = axiosInstance.get;
+export const post = axiosInstance.post;
+export const put = axiosInstance.put;
+export const del = axiosInstance.delete;
+```
+
+## react
+
+它创造了虚拟 dom 并且将它们储存起来，每当状态发生变化的时候就会创造新的虚拟节点和以前的进行对比，让变化的部分进行渲染。
+
+### react 的 diff 算法
+
+1. 组件更新的时候，react 会创建一个新的虚拟 dom 树，和之前的存储的 dom 树进行对比，这个比较的过程用到了 diff 算法。（初始化用不到）
+2. 它假设：相同的节点具有类似的结构，而不同的节点具有不同的结构。
+3. 列表的 diff 算法：列表具有相同的结构，对列表节点进行增删改查的时候，单个节点的整体操作远比一个个对比/替换好，所以创建列表的时候需要设置 key 值。
+   ![diff 算法](https://github.com/Hazelnuttt/StudyNotes/blob/master/reactProject/docs/diff.JPG)
+
+### React 生命周期
+
+- ![lifetime](https://github.com/Hazelnuttt/StudyNotes/blob/master/reactProject/docs/lifetime.png)
+
+### shouldComponentUpdate && PureComponent && immutable.js
+
+- `shouldComponetUpdate`在首次渲染或`forceUpdate()`不会调用该方法
+- 当`props`或`state`发生变化时，`shoudComponetUpdate()`会在渲染之前调用，默认返回 true
+  ![Newlifetime](https://github.com/Hazelnuttt/StudyNotes/blob/master/reactProject/docs/Newlifetime.JPG)
+- `React.PureComponent`以浅层对比(是否是对象，是否不为空，属性数量是否相等，属性的值是否一样，不比较实际的值)`props`和`state`的方式来实现函数
+- `PureComponent`里用到了`shouldComponetUpdate()`和浅层对比
+- `immutable.js`是持久性数据库，它的数据一旦创建，不会再变化，经过操作的数据永远会返回一个新的对象。
+- `immutable.js`原理`Persistent Data Structure`(持久化数据结构)+`Structural Sharing`(结构共享)，使用旧数据避免`Deep Copy`,如果对象树中一个 root 改变，只修改这个 root、和它影响的父节点，其他节点进行共享
+  ![Newlifetime](https://github.com/Hazelnuttt/StudyNotes/blob/master/reactProject/docs/Immutable.JPG)
+
+### 父子组件通信
+
+[父子通信](http://hazelnuttt.com/2019/07/15/parent-child/#more)
+
+#### 父组件调用子组件的方法
+
+> > Refs 提供了一种方式，允许我们访问 DOM 节点或在 render 方法中创建的 React 元素。
+
+> > 在典型的 React 数据流中，props 是父组件与子组件交互的唯一方式。要修改一个子组件，你需要使用新的 props 来重新渲染它。但是，在某些情况下，你需要在典型数据流之外强制修改子组件。
+
+```js
+class Editor extends React.PureComponent {
+  state = {}
+  componentDidMount() {
+    this.refs.modify.fetchProfile1() // MyEditor 里的方法
+  }
+
+  render() {
+    return (
+      <>
+        <MyEditor ref="modify" />
+        <Button type="primary" size="large" onClick={() => this.refs.modify.handleModify1()}>
+          修改
+        </Button>
+      </>
+    )
+  }
+}
+
+export default Editor
+```
+
+## react-router
+
+```js
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect,
+  RouteComponentProps,
+  WithRouter,
+  Redirect,
+  Link
+} from 'react-router-dom'
+```
+
+- router | --App --Admin
+
+```js
+renderAdminRoute = () => {
+      return <AdminRouter />;
+  };
+
+  render() {
+    return (
+        <Router>
+          <Switch>
+            <Route
+              path="/admin"
+              render={props => this.renderAdminRoute()}
+            ></Route>
+            <Route path="/" render={props => <AppRouter />}></Route>
+          </Switch>
+        </Router>
+    );
+  }
+}
+```
+
+- WithRouter 的作用
+  将 react-router 的 history、location、match 三个对象传入 props 对象上
+
+```js
+this.props.match.params.id
+```
+
+## redux
+
+### combineReducers
+
+## TypeScript
+
+### 类与类
+
+1. 类继承（只能一个）
+2. 类多继承（Mixins）
+
+### 接口与类
+
+1. 类继承接口（多）
+2. 接口继承类（同上 类与类）
+
+### 接口与接口
+
+1. 多
