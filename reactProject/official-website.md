@@ -4,6 +4,9 @@
 
 - antd
 - axios
+- react
+- react-router
+- redux
 
 ## axios
 
@@ -87,6 +90,14 @@ export const del = axiosInstance.delete;
 - `immutable.js`原理`Persistent Data Structure`(持久化数据结构)+`Structural Sharing`(结构共享)，使用旧数据避免`Deep Copy`,如果对象树中一个 root 改变，只修改这个 root、和它影响的父节点，其他节点进行共享
   ![Newlifetime](https://github.com/Hazelnuttt/StudyNotes/blob/master/reactProject/docs/Immutable.JPG)
 
+### 为什么 setState 不设计成同步的（这个问题应该和 redux 异步 有共通性吧？）
+
+1. 保持内部一致性和状态的安全。（不是很明白）
+2. 性能优化
+
+   - 异步获取数据后，统一渲染页面
+   - react 会依据不同的调用源，给不同的 setState 调用分配不同的优先级（调用源：事件处理、网络请求、动画）
+
 ### 父子组件通信
 
 [父子通信](http://hazelnuttt.com/2019/07/15/parent-child/#more)
@@ -166,7 +177,32 @@ this.props.match.params.id
 
 ## redux
 
-### combineReducers
+### redux 数据的生命周期
+
+1. 调用 `store.dispatch(action)`
+   > 触发 action
+2. Redux Store 调用 reducer 函数
+   > store 会把两个参数传入 reducer ：当前的 state 和 action
+3. 根 reducer 把多个 子 reducer 输出合并成一个单一的 state 树
+   > 是否有多个 reducer，视情况。所有 state 都以一个对象树的形式合并存储是一定的。
+4. Redux stone 保存了根 reducer 返回的完整的 state 树
+
+### 处理 Action
+
+在为 action 开发一些 reducer 的时候，有一个 reducer 组合 的概念。比如：一个网站的首页内容的 fetch,通过 combineReducer() 把 子 reducer 合并成一个大的 reducer；一个网站所有的某些特定的内容的 post,同上，处理成一个 reducer。
+
+### 同步 && 异步
+
+#### 同步
+
+在基础教程中，是同步操作。每当 dispatch action 时，state 会被立即更新
+
+#### 异步
+
+- 如何把 同步 acion 和 网络请求结合 => redux-thunk（等一系列 middleware）
+  - 核心：middleware --> 创建函数返回 --> 1.action 对象 2.函数
+  - action 创建函数 返回函数时，这个函数被 redux-thunk 执行。它不需要保持纯净，它可以包括：1.异步 API 请求 2.dispatch acion
+- connect 是异步的
 
 ## TypeScript
 
@@ -183,3 +219,15 @@ this.props.match.params.id
 ### 接口与接口
 
 1. 多
+
+## 封装
+
+1. axios
+2. login
+
+## 重构
+
+1. 组件提取
+2. redux/mode(如果 fetch、put、等一些与 state 有关的一些方法 全部放到 mode 里面，意味着 state 都要挂到 state 树上，那就没有`this.setState()`？但是一些 isVisible 这些小 state 也要挂吗？)
+3. router [App/Admin]
+4. menuConfig
