@@ -1,18 +1,20 @@
-# 项目总结（一个基于`react`+`react-router`+`redux`的官网）
+---
+title: 项目总结
+categories: 官网
+data: 2019-10-7
+---
 
-## 第三方库
+# axios
 
-- antd
-- axios
-- react
-- react-router
-- redux
+## 原理
 
-## axios
+[axios 原理](https://blog.csdn.net/mmjinglin/article/details/82761126)
 
-- 有一些[固定的封装好的方法](https://github.com/axios/axios/blob/master/README.md#request-method-aliases) get/post/delete/put...
-- 使用自定义配置[创建一个 axios 实例](https://github.com/axios/axios/blob/master/README.md#creating-an-instance)
-- [拦截器（err/loading）](https://github.com/axios/axios/blob/master/README.md#interceptors)
+## 用法
+
+- [使用固定的封装好的方法](https://github.com/axios/axios/blob/master/README.md#request-method-aliases) get/post/delete/put...
+- [使用自定义配置创建一个 axios 实例](https://github.com/axios/axios/blob/master/README.md#creating-an-instance)
+- [使用拦截器（err/loading）](https://github.com/axios/axios/blob/master/README.md#interceptors)
 
 ```js
 class Axios {
@@ -64,9 +66,18 @@ export const put = axiosInstance.put;
 export const del = axiosInstance.delete;
 ```
 
-## react
+## 优点
+
+该封装包括了：1. 更新 header 中的 token 2. 拦截器 3. 指定的配置(this.axiosInstance)与可用的实例方法(get、post...)合并。
+使得调用时代码极简，开发时专注于处理 res.data，逻辑清晰。
+
+# react
+
+## 原理
 
 它创造了虚拟 dom 并且将它们储存起来，每当状态发生变化的时候就会创造新的虚拟节点和以前的进行对比，让变化的部分进行渲染。
+
+## 知识点
 
 ### react 的 diff 算法
 
@@ -102,11 +113,11 @@ export const del = axiosInstance.delete;
 
 [父子通信](http://hazelnuttt.com/2019/07/15/parent-child/#more)
 
-#### 父组件调用子组件的方法
+### 父组件调用子组件的方法
 
-> > Refs 提供了一种方式，允许我们访问 DOM 节点或在 render 方法中创建的 React 元素。
-
-> > 在典型的 React 数据流中，props 是父组件与子组件交互的唯一方式。要修改一个子组件，你需要使用新的 props 来重新渲染它。但是，在某些情况下，你需要在典型数据流之外强制修改子组件。
+- Refs 提供了一种方式，允许我们访问 DOM 节点或在 render 方法中创建的 React 元素。
+- 在典型的 React 数据流中，props 是父组件与子组件交互的唯一方式。要修改一个子组件，你需要使用新的 props 来重新渲染它。但是，在某些情况下，你需要在典型数据流之外强制修改子组件。
+- Example:
 
 ```js
 class Editor extends React.PureComponent {
@@ -130,22 +141,11 @@ class Editor extends React.PureComponent {
 export default Editor
 ```
 
-## react-router
+# react-router
 
-```js
-import {
-  BrowserRouter as Router,
-  Route,
-  Switch,
-  Redirect,
-  RouteComponentProps,
-  WithRouter,
-  Redirect,
-  Link
-} from 'react-router-dom'
-```
+## 用法
 
-- router | --App --Admin
+- router 分割(App|Admin)
 
 ```js
 renderAdminRoute = () => {
@@ -168,14 +168,21 @@ renderAdminRoute = () => {
 }
 ```
 
-- WithRouter 的作用
+- WithRouter
   将 react-router 的 history、location、match 三个对象传入 props 对象上
+  可用来获取路由上的一些信息
 
 ```js
 this.props.match.params.id
 ```
 
-## redux
+## 优点
+
+- 重构路由，把路由按照一定逻辑或作用分割，代码清晰
+
+# redux
+
+## 知识点
 
 ### redux 数据的生命周期
 
@@ -204,7 +211,84 @@ this.props.match.params.id
   - action 创建函数 返回函数时，这个函数被 redux-thunk 执行。它不需要保持纯净，它可以包括：1.异步 API 请求 2.dispatch acion
 - connect 是异步的
 
-## TypeScript
+## 用法
+
+文件结构
+
+```
+|- modes
+  |-- BannerMode
+  |-- LoginMode
+  |-- ProductMode
+  |-- ProfileMode
+```
+
+Example:
+
+```js
+export default class BannerMode extends BaseMode {
+  fetchBannerList = (): Promise<IBanner[]> => {
+    return get('/rotation_charts').then((res: Resp<IBanner[]>) => {
+      this.updateBannerListState(res.data);
+      console.log(res.data);
+      return res.data;
+    });
+  };
+
+  // action
+  updateBannerListState = (banners: IBanner[]) => {
+    this.dispatch({
+      type: UPDATE_BANNERS,
+      payload: banners
+    } as IActionType<IBanner[]>);
+  };
+}
+
+interface IBannerListState {
+  bannerList: IBanner[];
+}
+
+const INIT_STATE: IBannerListState = {
+  bannerList: []
+};
+
+// 子reducer
+export const BannerReducer = (
+  state: IBannerListState = INIT_STATE,
+  action: IActionType
+) => {
+  switch (action.type) {
+    case UPDATE_BANNERS:
+      return {
+        ...state,
+        bannerList: action.payload
+      };
+    default:
+      return state;
+  }
+};
+```
+
+```js
+//使用 combineReducers
+export default function createReducer(injectedReducers = {}) {
+  return combineReducers({
+    ...injectedReducers,
+    profile: ProfileReducer,
+    login: LoginReducer,
+    banner: BannerReducer,
+    product: ProductReducer
+  })
+}
+```
+
+## 优点
+
+BannerModes 等于一个容器组件，一个逻辑对应一个 reducer 组合,BannerModes 把属于自己的 action、reducer 集中，最后合并。modes 文件夹下逻辑清晰，对应到开发工具 composeWithDevTools，便于测试。
+
+# TypeScript
+
+## 知识点
 
 ### 类与类
 
@@ -220,14 +304,49 @@ this.props.match.params.id
 
 1. 多
 
-## 封装
+# 总结
 
-1. axios
-2. login
+1. 一个项目的封装、重构是不可能少的
 
-## 重构
+- 封装
 
-1. 组件提取
-2. redux/mode(如果 fetch、put、等一些与 state 有关的一些方法 全部放到 mode 里面，意味着 state 都要挂到 state 树上，那就没有`this.setState()`？但是一些 isVisible 这些小 state 也要挂吗？)
-3. router [App/Admin]
-4. menuConfig
+  - axios
+  - login
+
+- 重构
+
+  - 组件提取
+  - redux/mode
+  - router [App/Admin]
+  - menuConfig
+
+2. redux 写得好真的有用，composeWithDevTools 上面看的很舒服，很清楚
+
+# QS
+
+- 如果 fetch、put、等一些与 state 有关的一些方法 全部放到 mode 里面，意味着 state 都要挂到 state 树上，那就没有`this.setState()`？但是一些 isVisible 这些小 state 也要挂吗？
+- redux-chunk 什么时候要用
+- 下面这个写法好吗？
+
+```js
+// 映射Redux全局的state到组件的props上
+const mapStateToProps = (state) => ({
+
+});
+// 映射dispatch到props上
+const mapDispatchToProps = (dispatch) => {
+  return {
+    togglePlayListDispatch(data) {
+      dispatch(changeShowPlayList(data));
+    },
+    changeCurrentIndexDispatch(data) {
+      dispatch(changeCurrentIndex(data));
+    },
+    changeModeDispatch(data) {
+      dispatch(changePlayMode(data));
+    },
+    changePlayListDispatch(data) {
+      dispatch(changePlayList(data));
+    }
+  }
+```
