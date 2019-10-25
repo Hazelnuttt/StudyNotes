@@ -4,7 +4,7 @@ categories: 官网
 data: 2019-10-7
 ---
 
-# axios
+# 1.axios
 
 ### 原理
 
@@ -71,7 +71,7 @@ data: 2019-10-7
 该封装包括了：1. 更新 header 中的 token 2. 拦截器 3. 指定的配置(this.axiosInstance)与可用的实例方法(get、post...)合并。
 使得调用时代码极简，开发时专注于处理 res.data，逻辑清晰。
 
-# react
+# 2.react
 
 ### 原理
 
@@ -141,7 +141,7 @@ data: 2019-10-7
       export default Editor
       ```
 
-# react-router
+# 3.react-router
 
 ### 用法
 
@@ -180,7 +180,7 @@ data: 2019-10-7
 
 重构路由，把路由按照一定逻辑或作用分割，代码清晰
 
-# redux
+# 4.redux
 
 ### 知识点
 
@@ -283,7 +283,7 @@ export default function createReducer(injectedReducers = {}) {
 
 BannerModes 等于一个容器组件，一个逻辑对应一个 reducer 组合,BannerModes 把属于自己的 action、reducer 集中，最后合并。modes 文件夹下逻辑清晰，对应到开发工具 composeWithDevTools，便于测试。
 
-# TypeScript
+# 5.TypeScript
 
 ### 知识点
 
